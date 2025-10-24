@@ -1,6 +1,6 @@
 ﻿/*
 		This file is part of Distant Object Enhancement /L
-			© 2021-2024 LisiasT
+			© 2020-2025 LisiasT
 			© 2019-2021 TheDarkBadger
 			© 2014-2019 MOARdV
 			© 2014 Rubber Ducky
@@ -26,7 +26,6 @@
 */
 using UnityEngine;
 using KSP.UI.Screens;
-using System;
 
 namespace DistantObject
 {
@@ -36,8 +35,14 @@ namespace DistantObject
 		private SettingsGui settingsGui;
 		private void Awake()
 		{
+			Log.dbg("SettingsGuiOnMainMenu.Awake()");
 			this.settingsGui = new SettingsGui();
 			this.settingsGui.Awake();
+		}
+
+		private void Start()
+		{
+			Settings.Instance.Load();
 		}
 
 		private void OnGUI()
@@ -53,13 +58,23 @@ namespace DistantObject
 	}
 
 	[KSPAddon(KSPAddon.Startup.AllGameScenes, false)]
-	internal class SettingsGuiOnGameScenes:MonoBehaviour
+	internal class SettingsGuiOnGameScenes:MonoBehaviour, KSPe.IO.SaveGameMonitor.SaveGameLoadedListener
 	{
 		private SettingsGui settingsGui;
 		private void Awake()
 		{
+			Log.dbg("SettingsGuiOnGameScenes.Awake()");
 			this.settingsGui = new SettingsGui();
 			this.settingsGui.Awake();
+		}
+
+		private void Start()
+		{
+			Settings.Instance.Load();
+			if (KSPe.IO.SaveGameMonitor.Instance.IsValid)
+				Settings.Instance.Commit();
+			else
+				KSPe.IO.SaveGameMonitor.Instance.AddSingleShot(this);
 		}
 
 		private void OnGUI()
@@ -72,11 +87,21 @@ namespace DistantObject
 			this.settingsGui.OnDestroy();
 			this.settingsGui = null;
 		}
+
+		void KSPe.IO.SaveGameMonitor.SaveGameLoadedListener.OnSaveGameLoaded(string name)
+		{
+			Log.dbg("SaveGame {0} is ready!", name);
+			Settings.Instance.Load();
+			Settings.Instance.Commit();
+		}
+
+		void KSPe.IO.SaveGameMonitor.SaveGameLoadedListener.OnSaveGameClosed() { }
 	}
 
 	partial class SettingsGui
     {
-        protected Rect windowPos = new Rect(Screen.width / 4, Screen.height / 4, 10f, 10f);
+		private readonly int windowId = KSPe.UI.UID.Get();
+		protected Rect windowPos = new Rect(Screen.width / 4, Screen.height / 4, 10f, 10f);
 		protected Vector2 scrollViewPosition = new Vector2();
 
         private static bool activated = false;
@@ -85,6 +110,11 @@ namespace DistantObject
 		private Settings buffer = new Settings();
 
         private static ApplicationLauncherButton appLauncherButton = null;
+
+		~SettingsGui()
+		{
+			KSPe.UI.UID.Release(this.windowId);
+		}
 
 		private void ApplySettings()
 		{
@@ -179,7 +209,8 @@ namespace DistantObject
             {
                 button = ApplicationLauncher.Instance.AddModApplication(onAppLauncherTrue, onAppLauncherFalse,
                     null, null, null, null,
-                    (buffer.onlyInSpaceCenter) ? ApplicationLauncher.AppScenes.SPACECENTER : (ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.SPACECENTER),
+					ApplicationLauncher.AppScenes.MAINMENU |
+						(buffer.onlyInSpaceCenter ? ApplicationLauncher.AppScenes.SPACECENTER : (ApplicationLauncher.AppScenes.FLIGHT | ApplicationLauncher.AppScenes.SPACECENTER)),
                     iconTexture);
 
                 if (button == null)
@@ -219,7 +250,7 @@ namespace DistantObject
             GameEvents.onGUIApplicationLauncherReady.Add(AddAppLauncherButton);
             GameEvents.onGUIApplicationLauncherDestroyed.Add(RemoveAppLauncherButton);
 
-            if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.FLIGHT)
+            //if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.FLIGHT)
             {
                 if (buffer.useToolbar && ToolbarManager.ToolbarAvailable)
                 {
@@ -482,21 +513,18 @@ namespace DistantObject
 		}
 
 		internal void drawGUI()
-        {
-            if (HighLogic.LoadedScene == GameScenes.SPACECENTER || HighLogic.LoadedScene == GameScenes.FLIGHT)
-            {
-                if (activated)
-                {
-                    if (!isActivated)
-                    {
-                        ReadSettings();
-                    }
+		{
+			if (activated)
+			{
+				if (!isActivated)
+				{
+					ReadSettings();
+				}
 
-                    windowPos = GUILayout.Window(-5234628, windowPos, mainGUI, Globals.DistantObject + " Settings", GUILayout.Width(320), GUILayout.Height(600));
-                }
-                isActivated = activated;
-            }
-        }
+				windowPos = GUILayout.Window(this.windowId, windowPos, mainGUI, Globals.DistantObject + " Settings", GUILayout.Width(320), GUILayout.Height(600));
+			}
+			isActivated = activated;
+		}
 
 		private void Reset() => this.buffer = new Settings();
 

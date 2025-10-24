@@ -1,6 +1,6 @@
 ﻿/*
 		This file is part of Distant Object Enhancement /L
-			© 2021-2024 LisiasT
+			© 2020-2025 LisiasT
 			© 2019-2021 TheDarkBadger
 			© 2014-2019 MOARdV
 			© 2014 Rubber Ducky
@@ -762,6 +762,7 @@ namespace DistantObject
 		private void Start()
 		{
 			Settings.Instance.Load();
+			Settings.Instance.Commit();
 
 			Dictionary<string, Vessel.Situations> namedSituations = new Dictionary<string, Vessel.Situations> {
 				{ Vessel.Situations.LANDED.ToString(), Vessel.Situations.LANDED},

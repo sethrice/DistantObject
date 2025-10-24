@@ -1,6 +1,6 @@
 ﻿/*
 		This file is part of Distant Object Enhancement /L
-			© 2021-2024 LisiasT
+			© 2020-2025 LisiasT
 			© 2019-2021 TheDarkBadger
 			© 2014-2019 MOARdV
 			© 2014 Rubber Ducky
@@ -24,7 +24,7 @@
 		along with Distant Object Enhancement /L.
 		If not, see <https://www.gnu.org/licenses/>.
 */
-using System;
+using UnityEngine;
 
 namespace DistantObject.Contract
 {
@@ -33,6 +33,17 @@ namespace DistantObject.Contract
 		public interface Interface
 		{
 			Vector3d GetSunPosition();
+
+			double CalculateSunBrightness(double minimumSignificantBodySize, Camera cam);
+
+			double CalculatePlanetsBrightness(
+				double minimumSignificantBodySize
+				, double minimumTargetRelativeAngle
+				, double referenceBodySize
+				, Camera cam
+				);
+
+			double CalculateSunCoronaBrightness(double minimumSignificantBodySize, Camera cam);
 		}
 
 		private static Interface INSTANCE;

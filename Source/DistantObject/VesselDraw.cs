@@ -1,6 +1,6 @@
 ﻿/*
 		This file is part of Distant Object Enhancement /L
-			© 2021-2024 LisiasT
+			© 2020-2025 LisiasT
 			© 2019-2021 TheDarkBadger
 			© 2014-2019 MOARdV
 			© 2014 Rubber Ducky
@@ -122,6 +122,7 @@ namespace DistantObject
 
 			//Load settings
 			Settings.Instance.Load();
+			Settings.Instance.Commit();
 
 			GameEvents.onVesselChange.Add(this.OnVesselChange);
 			GameEvents.onVesselGoOnRails.Add(this.OnVesselGoOnRails);

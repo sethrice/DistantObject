@@ -1,6 +1,6 @@
 ﻿/*
 		This file is part of Distant Object Enhancement /L
-			© 2021-2024 LisiasT
+			© 2020-2025 LisiasT
 			© 2019-2021 TheDarkBadger
 			© 2014-2019 MOARdV
 			© 2014 Rubber Ducky
@@ -378,7 +378,7 @@ namespace DistantObject
 		public readonly DistantVesselClass DistantVessel;
 		public readonly SkyboxBrightnessClass SkyboxBrightness;
 
-		public bool debugMode = false;
+		public bool debugMode = Globals.DEBUG;
 		public bool useToolbar = false;
 		public bool useAppLauncher = true;
 		public bool onlyInSpaceCenter = false;
@@ -447,8 +447,10 @@ namespace DistantObject
 
 		private ConfigNode LoadSettings()
 		{
-			if (HighLogic.LoadedSceneIsGame && SIO.File.Exists(Globals.CONFIG_PATHNAME))
+			if (KSPe.IO.SaveGameMonitor.Instance.IsValid && SIO.File.Exists(Globals.CONFIG_PATHNAME))
 				return ConfigNode.Load(Globals.CONFIG_PATHNAME);
+			else if (SIO.File.Exists(Globals.CONFIG_PATHNAME_MAINMENU))
+				return ConfigNode.Load(Globals.CONFIG_PATHNAME_MAINMENU);
 
 			return ConfigNode.Load(Globals.REFERENCE_CONFIG_PATHNAME);
 		}
@@ -472,9 +474,16 @@ namespace DistantObject
 
 		private void saveSettings(ConfigNode settings)
 		{
-			SIO.Directory.CreateDirectory(Globals.CONFIG_DIRECTORY);
-			settings.Save(Globals.CONFIG_PATHNAME);
-
+			if (KSPe.IO.SaveGameMonitor.Instance.IsValid)
+			{
+				SIO.Directory.CreateDirectory(Globals.CONFIG_DIRECTORY);
+				settings.Save(Globals.CONFIG_PATHNAME);
+			}
+			else
+			{
+				SIO.Directory.CreateDirectory(Globals.CONFIG_DIRECTORY_MAINMENU);
+				settings.Save(Globals.CONFIG_PATHNAME_MAINMENU);
+			}
 		}
 
 		public void Commit()
@@ -482,6 +491,7 @@ namespace DistantObject
 			if (null != VesselDraw.Instance) VesselDraw.Instance.SetActiveTo(this.DistantVessel.renderVessels);
 			if (null != FlareDraw.Instance) FlareDraw.Instance.SetActiveTo(this.DistantFlare.flaresEnabled);
 			if (null != DarkenSky.Instance) DarkenSky.Instance.SetActiveTo(this.SkyboxBrightness.changeSkybox);
+			Debug.DarkenSky.Instance.Show = this.debugMode;
 		}
 	}
 }

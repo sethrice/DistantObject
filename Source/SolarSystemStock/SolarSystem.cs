@@ -1,6 +1,6 @@
 ﻿/*
 		This file is part of Distant Object Enhancement /L
-			© 2021-2024 LisiasT
+			© 2020-2025 LisiasT
 			© 2019-2021 TheDarkBadger
 			© 2014-2019 MOARdV
 			© 2014 Rubber Ducky
@@ -24,16 +24,35 @@
 		along with Distant Object Enhancement /L.
 		If not, see <https://www.gnu.org/licenses/>.
 */
-using System;
+using UnityEngine;
 
 using DistantObject.Contract;
 
 namespace DistantObject.SolarSystem.Stock
 {
-	public class SolarSystem : SolarSystemEngine.Interface
+	public partial class SolarSystem : SolarSystemEngine.Interface
 	{
 		public SolarSystem() { }
 
 		Vector3d SolarSystemEngine.Interface.GetSunPosition() => FlightGlobals.Bodies[0].position;
+
+		double SolarSystemEngine.Interface.CalculatePlanetsBrightness(double minimumSignificantBodySize, double minimumTargetRelativeAngle, double referenceBodySize, Camera cam)
+		{
+			CelestialBody sun = FlightGlobals.Bodies[0];
+			return CommonUtils.CalculatePlanetsBrightness(sun, minimumSignificantBodySize, minimumTargetRelativeAngle, referenceBodySize, cam);
+		}
+
+		double SolarSystemEngine.Interface.CalculateSunBrightness(double minimumSignificantBodySize, Camera cam)
+		{
+			CelestialBody sun = FlightGlobals.Bodies[0];
+			return CommonUtils.CalculateSunBrightness(sun, minimumSignificantBodySize, cam);
+		}
+
+		double SolarSystemEngine.Interface.CalculateSunCoronaBrightness(double minimumSignificantBodySize, Camera cam)
+		{
+			CelestialBody sun = FlightGlobals.Bodies[0];
+			return CommonUtils.CalculateSunCoronaBrightness(sun, minimumSignificantBodySize, cam);
+		}
+
 	}
 }
