@@ -108,7 +108,7 @@ namespace DistantObject
 		{
 			if (!this.IsOnFieldOfViewOf(camera)) return false;
 			if (Physics.Linecast(camera.transform.position, this.meshRenderer.bounds.center, out RaycastHit hit))
-				return hit.transform.name == this.meshRenderer.transform.name;
+				return hit.transform == this.meshRenderer.transform;
 			return true;
 		}
 	}
